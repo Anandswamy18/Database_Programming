@@ -1,0 +1,141 @@
+postgres=# \c mydatabase 
+You are now connected to database "mydatabase" as user "postgres".
+mydatabase=# CREATE OR REPLACE PROCEDURE get_all_students()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    SELECT * FROM student;
+END;
+$$;
+To call this stored procedure and execute it, you can use the CALL statement:
+
+++++++++++++++>
+CALL get_all_students();
+CREATE PROCEDURE
+ERROR:  syntax error at or near "To"
+LINE 1: To call this stored procedure and execute it, you can use th...
+        ^
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_students()
+RETURNS TABLE (student_id INT, student_name TEXT, student_age INT) AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM student;
+END;
+$$ LANGUAGE plpgsql;
+ERROR:  cannot change routine kind
+DETAIL:  "get_all_students" is a procedure.
+mydatabase=# DROP PROCEDURE IF EXISTS get_all_students;
+DROP PROCEDURE
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_students()
+RETURNS TABLE (student_id INT, student_name TEXT, student_age INT) AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM student;
+END;
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+mydatabase=# SELECT * FROM get_all_students();
+ERROR:  structure of query does not match function result type
+DETAIL:  Returned type character varying(100) does not match expected type text in column 2.
+CONTEXT:  SQL statement "SELECT * FROM student"
+PL/pgSQL function get_all_students() line 3 at RETURN QUERY
+mydatabase=# DROP PROCEDURE IF EXISTS get_all_students;
+NOTICE:  procedure get_all_students() does not exist, skipping
+DROP PROCEDURE
+mydatabase=# DROP FUNCTION IF EXISTS get_all_students();
+DROP FUNCTION
+mydatabase=# select * from student;
+ student_id | student_name | student_class | student_division 
+------------+--------------+---------------+------------------
+          1 | Revi         | 10th          | A
+          2 | Suresh       | 11th          | B
+          3 | Ramesh       | 12th          | C
+          4 | Emma         | 9th           | D
+          5 | Michael      | 11th          | A
+(5 rows)
+
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_students()
+RETURNS TABLE (student_id INT, student_name TEXT, student_class TEXT, student_division TEXT) AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM students;
+END;
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+mydatabase=# SELECT * FROM get_all_students();
+ERROR:  structure of query does not match function result type
+DETAIL:  Returned type character varying(50) does not match expected type text in column 2.
+CONTEXT:  SQL statement "SELECT * FROM students"
+PL/pgSQL function get_all_students() line 3 at RETURN QUERY
+mydatabase=# DROP FUNCTION IF EXISTS get_all_students();
+DROP FUNCTION
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_students()
+RETURNS SETOF students AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM students;
+END;
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+mydatabase=# SELECT * FROM get_all_students();
+ student_id | first_name | last_name | date_of_birth |           email            | course_id 
+------------+------------+-----------+---------------+----------------------------+-----------
+          1 | John       | Doe       | 1998-09-20    | john.doe@example.com       |       101
+          2 | Jane       | Smith     | 2000-03-12    | jane.smith@example.com     |       102
+          3 | Alice      | Johnson   | 1999-07-05    | alice.johnson@example.com  |          
+          4 | Bob        | Williams  | 2001-11-30    | bob.williams@example.com   |       103
+          5 | Emily      | Brown     | 1998-05-15    | emily.brown@example.com    |       102
+          6 | Michael    | Davis     | 2002-02-18    | michael.davis@example.com  |       102
+          7 | Sarah      | Martinez  | 2003-08-10    | sarah.martinez@example.com |       103
+          8 | David      | Anderson  | 1997-12-25    | david.anderson@example.com |       101
+          9 | Emma       | Garcia    | 2000-04-03    | emma.garcia@example.com    |       103
+(9 rows)
+
+mydatabase=# CREATE OR REPLACE PROCEDURE get_all_courses()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Return all rows from the courses table
+    RETURN QUERY SELECT * FROM course;
+END;
+$$;
+ERROR:  cannot use RETURN QUERY in a non-SETOF function
+LINE 6:     RETURN QUERY SELECT * FROM course;
+            ^
+mydatabase=# CREATE OR REPLACE PROCEDURE get_all_courses()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM courses;
+END;
+$$;
+ERROR:  cannot use RETURN QUERY in a non-SETOF function
+LINE 5:     RETURN QUERY SELECT * FROM courses;
+            ^
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_courses()
+RETURNS SETOF courses AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM courses;
+END;
+$$ LANGUAGE plpgsql;
+ERROR:  type "courses" does not exist
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_courses()
+RETURNS SETOF courses AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM course;
+END;
+$$ LANGUAGE plpgsql;
+ERROR:  type "courses" does not exist
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_course()
+RETURNS SETOF course AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM course;
+END;
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+mydatabase=# SELECT * FROM get_all_course();
+ course_id |  course_name   |       instructor       | credits 
+-----------+----------------+------------------------+---------
+       101 | Mathematics    | Dr. Smith              |       5
+       102 | Rocket Science | Dr. A.P.J.Abdual Kalam |       5
+       103 | PHYSICS        | Dr. Newton             |       5
+(3 rows)
+
+mydatabase=# 
+
