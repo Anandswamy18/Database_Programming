@@ -139,3 +139,154 @@ mydatabase=# SELECT * FROM get_all_course();
 
 mydatabase=# 
 
+mydatabase=# CREATE OR REPLACE PROCEDURE get_all_courses()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Return all rows from the courses table
+    RETURN QUERY SELECT * FROM course;
+END;
+$$;
+ERROR:  cannot use RETURN QUERY in a non-SETOF function
+LINE 6:     RETURN QUERY SELECT * FROM course;
+            ^
+mydatabase=# CREATE OR REPLACE PROCEDURE get_all_courses()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM courses;
+END;
+$$;
+ERROR:  cannot use RETURN QUERY in a non-SETOF function
+LINE 5:     RETURN QUERY SELECT * FROM courses;
+            ^
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_courses()
+RETURNS SETOF courses AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM courses;
+END;
+$$ LANGUAGE plpgsql;
+ERROR:  type "courses" does not exist
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_courses()
+RETURNS SETOF courses AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM course;
+END;
+$$ LANGUAGE plpgsql;
+ERROR:  type "courses" does not exist
+mydatabase=# CREATE OR REPLACE FUNCTION get_all_course()
+RETURNS SETOF course AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM course;
+END;
+$$ LANGUAGE plpgsql;
+CREATE FUNCTION
+mydatabase=# SELECT * FROM get_all_course();
+ course_id |  course_name   |       instructor       | credits 
+-----------+----------------+------------------------+---------
+       101 | Mathematics    | Dr. Smith              |       5
+       102 | Rocket Science | Dr. A.P.J.Abdual Kalam |       5
+       103 | PHYSICS        | Dr. Newton             |       5
+(3 rows)
+
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM courses WHERE course_id = course_id;
+END;
+$$;
+CREATE PROCEDURE
+mydatabase=# CALL delete_course(101);
+ERROR:  relation "courses" does not exist
+LINE 1: DELETE FROM courses WHERE course_id = course_id
+                    ^
+QUERY:  DELETE FROM courses WHERE course_id = course_id
+CONTEXT:  PL/pgSQL function delete_course(integer) line 3 at SQL statement
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM course WHERE course_id = course_id;
+END;
+$$;
+CREATE PROCEDURE
+mydatabase=# CALL delete_course(101);
+ERROR:  column reference "course_id" is ambiguous
+LINE 1: DELETE FROM course WHERE course_id = course_id
+                                 ^
+DETAIL:  It could refer to either a PL/pgSQL variable or a table column.
+QUERY:  DELETE FROM course WHERE course_id = course_id
+CONTEXT:  PL/pgSQL function delete_course(integer) line 3 at SQL statement
+mydatabase=# DROP PROCEDURE IF EXISTS delete_course;
+DROP PROCEDURE
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM courses WHERE course_id = course_id;
+END;
+$$;
+CREATE PROCEDURE
+mydatabase=# CALL delete_course(101);
+ERROR:  relation "courses" does not exist
+LINE 1: DELETE FROM courses WHERE course_id = course_id
+                    ^
+QUERY:  DELETE FROM courses WHERE course_id = course_id
+CONTEXT:  PL/pgSQL function delete_course(integer) line 3 at SQL statement
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(p_course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM courses WHERE course_id = p_course_id;
+END;
+$$;
+ERROR:  cannot change name of input parameter "course_id"
+HINT:  Use DROP PROCEDURE delete_course(integer) first.
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(p_course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM courses WHERE course_id = p_course_id;
+END;
+$$;
+ERROR:  cannot change name of input parameter "course_id"
+HINT:  Use DROP PROCEDURE delete_course(integer) first.
+mydatabase=# DROP PROCEDURE IF EXISTS delete_course(INT);
+DROP PROCEDURE
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(p_course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM courses WHERE course_id = p_course_id;
+END;
+$$;
+CREATE PROCEDURE
+mydatabase=# CALL delete_course(101);
+ERROR:  relation "courses" does not exist
+LINE 1: DELETE FROM courses WHERE course_id = p_course_id
+                    ^
+QUERY:  DELETE FROM courses WHERE course_id = p_course_id
+CONTEXT:  PL/pgSQL function delete_course(integer) line 3 at SQL statement
+mydatabase=# select * from course;
+ course_id |  course_name   |       instructor       | credits 
+-----------+----------------+------------------------+---------
+       101 | Mathematics    | Dr. Smith              |       5
+       102 | Rocket Science | Dr. A.P.J.Abdual Kalam |       5
+       103 | PHYSICS        | Dr. Newton             |       5
+(3 rows)
+
+mydatabase=# CREATE OR REPLACE PROCEDURE delete_course(p_course_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM course WHERE course_id = p_course_id;
+END;
+$$;
+CREATE PROCEDURE
+mydatabase=# CALL delete_course(101);
+ERROR:  update or delete on table "course" violates foreign key constraint "marks_course_id_fkey" on table "marks"
+DETAIL:  Key (course_id)=(101) is still referenced from table "marks".
+CONTEXT:  SQL statement "DELETE FROM course WHERE course_id = p_course_id"
+PL/pgSQL function delete_course(integer) line 3 at SQL statement
+mydatabase=# 
